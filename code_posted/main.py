@@ -62,7 +62,7 @@ def optimistic_exp_utils(grid, utils, curr_state, n_sa, n_sas):
     four values
     '''
 
-    if (rw.is_goal(grid, curr_state)):
+    if not rw.not_goal_and_wall(grid, curr_state):
         return [0,0,0,0]
 
     vals = []
@@ -86,7 +86,8 @@ def update_utils(world, grid, utils, n_sa, n_sas, gamma):
 
     for i in range(num_rows):
         for j in range(num_cols):
-            frontier.append((i, j))
+            if rw.not_goal_and_wall(grid, (i,j)):
+                frontier.append((i, j))
 
     while(len(frontier) > 0):
         curr_state = frontier.pop()
@@ -168,15 +169,15 @@ def state_action_pair_cond(grid, n_sa):
     return mini < N_e
 
 
-def lecture():
+def find_optimal_policy(world):
     # initialize variables
     curr_state = (0, 0)
-    utils = [[R_plus] * num_cols for i in range(num_rows)]  # s
+    utils = [[0.0] * num_cols for i in range(num_rows)]  # s
     n_sa = np.array([[[0] * num_moves for i in range(num_cols)]
             for i in range(num_rows)])  # s by a
     n_sas = [[[[[0] * num_cols for i in range(num_rows)]
             for i in range(num_moves)] for i in range(num_cols)] for i in range(num_rows)]  # s by a by s'
-    grid = rw.read_grid("lecture")
+    grid = rw.read_grid(world)
 
     iterations = 0
     util_updated = False
@@ -188,7 +189,7 @@ def lecture():
         best_dir = get_best_dir(grid, utils, curr_state, n_sa, n_sas)
 
         # now make that move
-        next_state = rw.make_move(grid, curr_state, best_dir, "lecture")
+        next_state = rw.make_move(grid, curr_state, best_dir, world)
         # print(f"choose to make move from {curr_state} in direction {best_dir}, next state is {next_state}")
 
         # 3. update n_sa and n_sas
@@ -199,7 +200,7 @@ def lecture():
             f"After updating, n_sa[{curr_state[0]}][{curr_state[1]}][{best_dir}] was {n_sa[curr_state[0]][curr_state[1]][best_dir]}, {n_sas[curr_state[0]][curr_state[1]][best_dir][next_state[0]][next_state[1]]}"
 
         # 4. update utils based on new n_sa and n_sas
-        util_updated = update_utils("lecture", grid, utils, n_sa, n_sas, rw.get_gamma("lecture"))
+        util_updated = update_utils(world, grid, utils, n_sa, n_sas, rw.get_gamma(world))
 
         # reset this trial if we reach goal state
         if rw.is_goal(grid, next_state):
@@ -225,12 +226,13 @@ def lecture():
     print(utils_to_policy(grid, utils, n_sa, n_sas))
 
 def main():
-    # dump_world_info("lecture")
+    # dump_world_info("a4")
     # provided_helpers("lecture")
     # test_get_reward_by_state("lecture")
     # test_state_action_pair_cond()
 
-    lecture()
+    find_optimal_policy("lecture")
+    find_optimal_policy("a4")
 # ---------------------------------------------------------------------------------
 
 def dump_world_info(world: str):
@@ -245,6 +247,7 @@ def provided_helpers(world: str):
     grid = rw.read_grid(world)
     print("next states:", rw.get_next_states(grid, (0, 0)))
     print("is_goal:", rw.is_goal(grid, (0, 0)))
+    print(rw.get_next_states(grid, (1, 1)))
 
 def test_get_reward_by_state(world):
     print(rw.read_grid(world))
