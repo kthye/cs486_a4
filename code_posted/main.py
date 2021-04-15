@@ -4,7 +4,7 @@ import numpy as np
 import random
 
 R_plus = 1.0
-N_e = 100
+N_e = 300
 num_rows = 3
 num_cols = 4
 num_moves = 4
@@ -98,8 +98,8 @@ def update_utils(world, grid, utils, n_sa, n_sas, gamma):
         V = reward + gamma * max(opt_exp_util_list)
 
         if V > 2.0:
-            print(f"for state {curr_state}, V: {V}, util: {utils[curr_state[0]][curr_state[1]]}")
-            print(f"This should not happen. opt list", opt_exp_util_list)
+            # print(f"for state {curr_state}, V: {V}, util: {utils[curr_state[0]][curr_state[1]]}")
+            # print(f"This should not happen. opt list", opt_exp_util_list)
             assert False
 
         # print(f"for state {curr_state}, V: {V}, util: {utils[curr_state[0]][curr_state[1]]}")
@@ -125,6 +125,10 @@ def utils_to_policy(grid, utils, n_sa, n_sas):
     Determine the optimal policy given to the current long-term utility value for each state.
     '''
     policy = np.array([[5] * num_cols for i in range(num_rows)]) # s
+    # print(type(policy))
+    # print(type(policy[0][0]))
+    # print(type(grid))
+    # print(type(grid[0][0]))
     for i, row in enumerate(utils):
         for j, val in enumerate(row):
             if not rw.not_goal_and_wall(grid, (i,j)):
@@ -211,10 +215,10 @@ def find_optimal_policy(world):
         # print(state_action_pair_cond(grid, n_sa), util_updated)
 
     # debug print statements
-    print("n_sa:\n", n_sa)
-    print("num iterations:", iterations)
+    # print("n_sa:\n", n_sa)
+    # print("num iterations:", iterations)
 
-    print("final utils:")
+    print("Final utility values for", world, ":")
     print("[", end='')
     for i, row in enumerate(utils):
         print("[", end='')
@@ -222,8 +226,9 @@ def find_optimal_policy(world):
             print("{:.3f}".format(val), end=' ')
         print("]") if i != 2 else print("]]")
      
-
-    print(utils_to_policy(grid, utils, n_sa, n_sas))
+    print("Optimal policy for", world, ":")
+    utils_to_policy(grid, utils, n_sa, n_sas)
+    print("")
 
 def main():
     # dump_world_info("a4")
